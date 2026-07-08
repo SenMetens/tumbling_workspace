@@ -43,19 +43,36 @@ export default function Team() {
     if (!workspace || !profile) return;
     setBusy(true);
     setError(null);
+    let invitationId: string | null = null;
     try {
-      const { error } = await supabase.from("invitations").insert({
+      const normalizedEmail = email.trim().toLowerCase();
+      const { data, error } = await supabase.from("invitations").insert({
         workspace_id: workspace.id,
-        email: email.trim().toLowerCase(),
+        email: normalizedEmail,
         role: inviteRole,
         invited_by: profile.id,
-      });
+      }).select("id").single();
       if (error) throw error;
+      invitationId = data.id;
+
+      const { error: mailError } = await supabase.auth.signInWithOtp({
+        email: normalizedEmail,
+        options: {
+          emailRedirectTo: `${window.location.origin}/onboarding`,
+          shouldCreateUser: true,
+          data: { invited_workspace_id: workspace.id },
+        },
+      });
+      if (mailError) {
+        await supabase.from("invitations").delete().eq("id", invitationId);
+        throw mailError;
+      }
+
       setEmail("");
       setInviteOpen(false);
       qc.invalidateQueries({ queryKey: ["invitations", workspace.id] });
     } catch (err) {
-      setError(err instanceof Error ? err.message : "초대 실패");
+      setError(err instanceof Error ? err.message : "초대 메일 발송 실패");
     } finally {
       setBusy(false);
     }
@@ -169,7 +186,7 @@ export default function Team() {
           <EmptyState
             icon={<Users size={34} />}
             title="아직 혼자네요"
-            description="팀원을 초대해 함께 사용해 보세요. 초대받은 사람은 같은 이메일로 가입하면 자동으로 합류할 수 있습니다."
+            description="팀원을 초대해 함께 사용해 보세요. 초대받은 사람은 메일 링크로 로그인한 뒤 초대를 수락할 수 있습니다."
             action={isAdmin && <Button size="sm" onClick={() => setInviteOpen(true)}><Plus size={14} /> 멤버 초대</Button>}
           />
         </div>
@@ -188,10 +205,10 @@ export default function Team() {
           </Field>
           {error && <p className="rounded-lg bg-red-50 px-3 py-2 text-[13px] text-red-600">{error}</p>}
           <p className="rounded-lg bg-stone-50 px-3 py-2 text-xs leading-5 text-stone-500">
-            초대한 이메일로 가입(또는 로그인)하면 온보딩 화면에서 이 워크스페이스 초대를 수락할 수 있습니다.
+            초대 메일의 링크로 로그인하면 온보딩 화면에서 이 워크스페이스 초대를 수락할 수 있습니다.
           </p>
           <Button type="submit" className="w-full" disabled={busy || !email.trim()}>
-            {busy ? "초대 중..." : "초대 보내기"}
+            {busy ? "초대 메일 보내는 중..." : "초대 메일 보내기"}
           </Button>
         </form>
       </Modal>
