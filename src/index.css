@@ -1,0 +1,112 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg-app: #f5f5f4;
+  --bg-surface: #ffffff;
+  --border: #e7e5e4;
+  --text-primary: #1c1917;
+  --text-secondary: #78716c;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  @apply bg-stone-100 text-stone-900 antialiased;
+  font-feature-settings: "tnum";
+  overscroll-behavior-y: none;
+}
+
+/* 포커스: 파란 기본 링 제거. 키보드 탐색 시 버튼/링크에만 은은한 스톤 아웃라인.
+   폼 컨트롤(input·textarea·select)은 자체 테두리 색으로 포커스 표시 → 아웃라인 없음 */
+:focus {
+  outline: none;
+}
+:focus-visible {
+  outline: 2px solid #d6d3d1;
+  outline-offset: 2px;
+}
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: none;
+}
+
+/* 네이티브 폼 컨트롤을 디자인 톤에 맞춤 */
+input[type="date"],
+input[type="time"] {
+  color-scheme: light;
+  -webkit-appearance: none;
+  appearance: none;
+}
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator {
+  opacity: 0.45;
+  cursor: pointer;
+}
+input[type="checkbox"] {
+  cursor: pointer;
+}
+
+/* 스크롤바: 얇고 옅게, 호버 시에만 진하게 */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #d6d3d1 transparent;
+}
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  border: 3px solid transparent;
+  background-clip: padding-box;
+  @apply rounded-full bg-stone-300/60;
+}
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-stone-400;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* 모바일 safe area */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Tiptap 에디터 placeholder */
+.ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  color: #a8a29e;
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+
+/* 문서 본문 렌더링 (에디터 공용) */
+.prose-doc {
+  @apply text-[15px] leading-7 text-stone-800;
+}
+.prose-doc h1 { @apply mb-3 mt-6 text-2xl font-bold; }
+.prose-doc h2 { @apply mb-2 mt-5 text-xl font-semibold; }
+.prose-doc h3 { @apply mb-2 mt-4 text-lg font-semibold; }
+.prose-doc p  { @apply my-2; }
+.prose-doc ul { @apply my-2 list-disc pl-6; }
+.prose-doc ol { @apply my-2 list-decimal pl-6; }
+.prose-doc blockquote { @apply my-3 border-l-2 border-stone-300 pl-4 text-stone-500; }
+.prose-doc code { @apply rounded bg-stone-100 px-1.5 py-0.5 font-mono text-[13px]; }
+.prose-doc pre { @apply my-3 overflow-x-auto rounded-xl bg-stone-900 p-4 text-stone-100; }
+.prose-doc pre code { @apply bg-transparent p-0 text-inherit; }
+.prose-doc a { @apply text-stone-900 underline underline-offset-2; }
+.prose-doc table { @apply my-3 w-full border-collapse text-sm; }
+.prose-doc th, .prose-doc td { @apply border border-stone-200 px-3 py-1.5 text-left; }
+.prose-doc th { @apply bg-stone-50 font-semibold; }
+.prose-doc hr { @apply my-4 border-stone-200; }
